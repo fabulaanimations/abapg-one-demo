@@ -176,6 +176,139 @@ input,select,textarea{background:#0d0d0d !important;color:#fff !important;border
 a{color:#ff63de}
 .hero,.visualCard,.premiumHero,.courseBanner,.quoteBlock{box-shadow:0 25px 60px rgba(0,0,0,.45)!important}
 
+
+/* ===== ABAPG ONE TRUE DARK FIX v6.4 ===== */
+:root{
+  --bg:#000000 !important;
+  --panel:#101010 !important;
+  --panel-soft:#151215 !important;
+  --ink:#f8f4f7 !important;
+  --muted:#b9adb6 !important;
+  --line:#2a2229 !important;
+  --brand:#000000 !important;
+  --brand-2:#0a080a !important;
+  --accent:#d52bbd !important;
+  --accent-2:#ff4bd8 !important;
+  --accent-soft:#2a1227 !important;
+}
+
+html,
+body{
+  background:#000 !important;
+  color:var(--ink) !important;
+}
+
+.app,
+.main,
+.content{
+  background:#000 !important;
+}
+
+.top{
+  background:rgba(0,0,0,.94) !important;
+  border-bottom:1px solid #2a2229 !important;
+}
+
+.card,
+.card.soft,
+.newsCard,
+.modalbox,
+.rolebox,
+.quick button,
+.quick a{
+  background:#101010 !important;
+  color:#f8f4f7 !important;
+  border-color:#2a2229 !important;
+}
+
+.card.soft{
+  background:#151215 !important;
+}
+
+.sectionTitle h2,
+.card h2,
+.card h3,
+.card h4,
+.kpi .value,
+.user,
+.user b,
+.table td,
+.table th{
+  color:#f8f4f7 !important;
+}
+
+.sectionTitle p,
+.sub,
+.meta,
+.kpi .label,
+.kpi .sub,
+.newsBody p{
+  color:#b9adb6 !important;
+}
+
+.table th,
+.table td,
+.attendance,
+.room,
+.feature{
+  border-color:#2a2229 !important;
+}
+
+.notice{
+  background:#101010 !important;
+  color:#f8f4f7 !important;
+  border-color:#2a2229 !important;
+  border-left-color:var(--accent) !important;
+}
+
+.field input,
+.field textarea,
+.field select{
+  background:#0b0b0b !important;
+  color:#fff !important;
+  border-color:#3a3038 !important;
+}
+
+.btn.outline,
+.btn.light{
+  background:#171317 !important;
+  color:#fff !important;
+  border-color:#463744 !important;
+}
+
+.status.off{
+  background:#242124 !important;
+  color:#d7ced5 !important;
+}
+
+.progress{
+  background:#2b2029 !important;
+}
+
+.initial{
+  background:#2b1728 !important;
+  color:#ff8ae7 !important;
+}
+
+.qrBox,
+.cameraBox{
+  background:#111 !important;
+  border-color:#352a33 !important;
+}
+
+.mobilebar{
+  background:rgba(0,0,0,.96) !important;
+  border-top:1px solid #2a2229 !important;
+}
+.mobilebar button{
+  color:#d8cdd5 !important;
+}
+
+@media(max-width:780px){
+  body,.app,.main,.content{background:#000 !important}
+}
+/* ===== FINE TRUE DARK FIX v6.4 ===== */
+
 </style>
 </head>
 <body>
@@ -647,7 +780,7 @@ pages.home = () => {
   if(state.role==='studente') return studentHomePremium();
   if(state.role!=='docente') return basePagesHomePremium();
 
-  return `${title('Dashboard','ABAPG One — concept premium')}
+  return `${title('Dashboard','ABAPG One — concept premium • DARK v6.4')}
   <section class="premiumHero">
     <div class="premiumHeroMedia" data-abapg-hero="academy"><img alt=""></div>
     <div class="premiumHeroContent">
