@@ -545,6 +545,249 @@ pages.piano=()=>`${title('Piano di studi','Piano ufficiale del corso del profilo
 </div>`;
 /* ===== FINE HOME STUDENTE v5 ===== */
 
+
+/* ===== ABAPG ONE PREMIUM RUNTIME v6.1 ===== */
+const ABAPG_PREMIUM_VERSION='6.1';
+
+function firstImgFromHtml(html){
+  if(!html) return null;
+  const box=document.createElement('div');
+  box.innerHTML=html;
+  const img=box.querySelector('img');
+  return img ? (img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy-src')) : null;
+}
+async function resolveAbapgImage(slug){
+  const types=['pages','posts','corsi'];
+  for(const type of types){
+    try{
+      const url='https://www.abaperugia.com/wp-json/wp/v2/'+type+'?slug='+encodeURIComponent(slug)+'&_embed=1&per_page=1';
+      const r=await fetch(url,{mode:'cors',cache:'no-store'});
+      if(!r.ok) continue;
+      const data=await r.json();
+      if(!Array.isArray(data)||!data.length) continue;
+      const item=data[0];
+      let image=null;
+      if(item._embedded && item._embedded['wp:featuredmedia'] && item._embedded['wp:featuredmedia'][0]){
+        image=item._embedded['wp:featuredmedia'][0].source_url || null;
+      }
+      if(!image && item.content && item.content.rendered) image=firstImgFromHtml(item.content.rendered);
+      if(image) return image;
+    }catch(e){}
+  }
+  return null;
+}
+async function applyAbapgImage(selector,slug){
+  const nodes=[...document.querySelectorAll(selector)];
+  if(!nodes.length) return;
+  const image=await resolveAbapgImage(slug);
+  if(!image) return;
+  nodes.forEach(node=>{
+    if(node.tagName==='IMG') node.src=image;
+    else{
+      const img=node.querySelector('img');
+      if(img) img.src=image;
+      else node.style.backgroundImage='url("'+image.replace(/"/g,'%22')+'")';
+    }
+  });
+}
+function stripHtmlPremium(html){
+  const box=document.createElement('div');
+  box.innerHTML=html||'';
+  return (box.textContent||'').trim();
+}
+async function loadLatestAbapgNews(){
+  const host=document.getElementById('abapg-news-live');
+  if(!host) return;
+  try{
+    const r=await fetch('https://www.abaperugia.com/wp-json/wp/v2/posts?per_page=3&_embed=1&orderby=date&order=desc',{mode:'cors',cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const posts=await r.json();
+    host.innerHTML=posts.map(p=>{
+      const image=(p._embedded && p._embedded['wp:featuredmedia'] && p._embedded['wp:featuredmedia'][0] && p._embedded['wp:featuredmedia'][0].source_url) || firstImgFromHtml(p.content && p.content.rendered) || '';
+      const excerpt=stripHtmlPremium(p.excerpt && p.excerpt.rendered).slice(0,145);
+      const date=new Date(p.date).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'});
+      return '<article class="newsCard">'+
+        '<div class="newsImage">'+(image?'<img src="'+image+'" alt="">':'')+'</div>'+
+        '<div class="newsBody"><div class="newsMeta">'+date+'</div>'+
+        '<h4>'+stripHtmlPremium(p.title && p.title.rendered)+'</h4>'+
+        '<p>'+excerpt+(excerpt.length>=145?'…':'')+'</p>'+
+        '<a class="btn outline" href="'+p.link+'" target="_blank" rel="noopener">Leggi sul sito</a></div></article>';
+    }).join('');
+  }catch(e){
+    host.innerHTML='<div class="card soft"><p class="sub">Le notizie live non sono disponibili in questo momento.</p><a class="btn outline" href="https://www.abaperugia.com/" target="_blank" rel="noopener">Apri abaperugia.com</a></div>';
+  }
+}
+function initPremiumMedia(){
+  applyAbapgImage('[data-abapg-hero="academy"]','aba-perugia');
+  applyAbapgImage('[data-abapg-hero="course"]','scenografia-triennale');
+  applyAbapgImage('[data-abapg-hero="museum"]','musa-museo-dellaccademia');
+  applyAbapgImage('[data-abapg-hero="campus"]','sede-san-francesco-al-prato');
+  applyAbapgImage('[data-abapg-hero="event"]','open-day-2026');
+  loadLatestAbapgNews();
+}
+
+const basePagesHomePremium = pages.home;
+
+pages.home = () => {
+  if(state.role==='studente') return studentHomePremium();
+  if(state.role!=='docente') return basePagesHomePremium();
+
+  return `${title('Dashboard','ABAPG One — concept premium')}
+  <section class="premiumHero">
+    <div class="premiumHeroMedia" data-abapg-hero="academy"><img alt=""></div>
+    <div class="premiumHeroContent">
+      <div class="premiumEyebrow">Accademia di Belle Arti Pietro Vannucci</div>
+      <h1 class="premiumTitle">L’Accademia<br>sempre con te.</h1>
+      <p class="premiumLead">Registro, lezioni, presenze, QR studenti e contenuti istituzionali in un’unica esperienza digitale proprietaria ABAPG.</p>
+      <div class="premiumActions">
+        <button class="btn primary" onclick="go('registro')">Apri registro</button>
+        <button class="btn premiumGhost" onclick="go('qrDocente')">Genera QR presenze</button>
+        <button class="btn premiumGhost" onclick="go('ufficiale')">Info ufficiali</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="premiumSectionHead">
+    <div><h2>Oggi in Accademia</h2><p>Le funzioni principali a colpo d’occhio.</p></div>
+  </div>
+
+  <div class="magazineGrid">
+    <article class="visualCard tall">
+      <img data-abapg-hero="campus" alt="">
+      <div class="visualCardContent">
+        <span class="premiumTag">Presenza</span>
+        <h3>${state.clockedIn?'Sei in sede':'Registra il tuo ingresso'}</h3>
+        <p>${state.clockedIn?('Ingresso registrato alle '+(state.clockTime||'08:24')):'Verifica la sede e registra la presenza con un tap.'}</p>
+        <button class="btn primary" onclick="clock()">${state.clockedIn?'Timbra uscita':'Timbra entrata'}</button>
+      </div>
+    </article>
+    <div class="grid">
+      <article class="visualCard">
+        <img data-abapg-hero="course" alt="">
+        <div class="visualCardContent">
+          <span class="premiumTag">Didattica</span>
+          <h3>Scenografia 3D</h3>
+          <p>14:30–17:30 • Aula 6</p>
+          <button class="btn premiumGhost" onclick="go('lezioni')">Lezioni</button>
+        </div>
+      </article>
+      <article class="visualCard">
+        <img data-abapg-hero="museum" alt="">
+        <div class="visualCardContent">
+          <span class="premiumTag">ABAPG</span>
+          <h3>Info ufficiali</h3>
+          <p>Calendario, piani, materie, esami e modulistica dal sito.</p>
+          <button class="btn premiumGhost" onclick="go('ufficiale')">Apri</button>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="premiumSectionHead">
+    <div><h2>Accesso rapido</h2><p>Le funzioni che usi ogni giorno.</p></div>
+  </div>
+  <div class="quick">
+    <button onclick="go('presenze')"><span class="ico">◉</span><strong>Timbratura</strong></button>
+    <button onclick="go('lezioni')"><span class="ico">▤</span><strong>Lezioni</strong></button>
+    <button onclick="go('registro')"><span class="ico">✓</span><strong>Registro</strong></button>
+    <button onclick="go('qrDocente')"><span class="ico">⌘</span><strong>QR presenze</strong></button>
+  </div>
+
+  <div class="premiumSectionHead">
+    <div><h2>Dal sito ABAPG</h2><p>Ultime notizie ed eventi pubblicati dall’Accademia.</p></div>
+  </div>
+  <div id="abapg-news-live" class="newsStrip"><div class="card soft">Caricamento notizie…</div></div>`;
+};
+
+function studentHomePremium(){
+  const p=studentDemoProfile;
+  return `${title('Home studente','Il tuo corso e la tua Accademia')}
+  <section class="courseBanner">
+    <div class="courseBannerMedia"><img data-abapg-hero="course" alt=""></div>
+    <div class="courseBannerText">
+      <div class="premiumEyebrow">Il mio corso</div>
+      <h2>${p.course}</h2>
+      <p>${p.level}</p>
+      <p>Un accesso unico a piano di studi, materie, orari, presenze ed esami.</p>
+      <div class="courseStats">
+        <div class="courseStat"><b>${p.totalCfa}</b><span>CFA percorso</span></div>
+        <div class="courseStat"><b>2°</b><span>anno demo</span></div>
+        <div class="courseStat"><b>84%</b><span>frequenza demo</span></div>
+      </div>
+      <div class="premiumActions">
+        <a class="btn primary" href="${p.courseUrl}" target="_blank" rel="noopener">Scheda corso</a>
+        <a class="btn premiumGhost" href="${p.planUrl}" target="_blank" rel="noopener">Piano di studi</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="magazineGrid">
+    <article class="visualCard tall">
+      <img data-abapg-hero="event" alt="">
+      <div class="visualCardContent">
+        <span class="premiumTag">Prossima lezione</span>
+        <h3>Scenografia</h3>
+        <p>17:00–19:00 • Aula 3</p>
+        <button class="btn primary" onclick="go('firmaQr')">Firma con QR</button>
+      </div>
+    </article>
+    <div class="grid">
+      <article class="visualCard">
+        <img data-abapg-hero="museum" alt="">
+        <div class="visualCardContent">
+          <span class="premiumTag">Piano di studi</span>
+          <h3>180 CFA</h3>
+          <p>Piano ufficiale del corso e materie.</p>
+          <button class="btn premiumGhost" onclick="go('piano')">Apri</button>
+        </div>
+      </article>
+      <article class="visualCard">
+        <img data-abapg-hero="campus" alt="">
+        <div class="visualCardContent">
+          <span class="premiumTag">Orari</span>
+          <h3>Lezioni</h3>
+          <p>Consulta l’orario ufficiale e il calendario.</p>
+          <button class="btn premiumGhost" onclick="go('lezioni')">Apri</button>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="premiumSectionHead">
+    <div><h2>Carriera</h2><p>Dati demo, in futuro sincronizzati con ISIDATA.</p></div>
+  </div>
+  <div class="grid g4">
+    <div class="card kpi"><div class="label">CFA acquisiti</div><div class="value">62</div><div class="sub">futuro ISIDATA</div></div>
+    <div class="card kpi"><div class="label">Media</div><div class="value">27,4</div><div class="sub">futuro ISIDATA</div></div>
+    <div class="card kpi"><div class="label">Esami prenotati</div><div class="value">2</div><div class="sub">futuro ISIDATA</div></div>
+    <div class="card kpi"><div class="label">Notifiche</div><div class="value">3</div><div class="sub">avvisi ABAPG</div></div>
+  </div>
+
+  <div class="premiumSectionHead">
+    <div><h2>News & vita accademica</h2><p>Contenuti dal sito istituzionale.</p></div>
+  </div>
+  <div id="abapg-news-live" class="newsStrip"><div class="card soft">Caricamento notizie…</div></div>`;
+}
+
+const renderBeforePremium = render;
+render = function(){
+  renderBeforePremium();
+  setTimeout(initPremiumMedia,30);
+};
+
+window.addEventListener('load',async()=>{
+  try{
+    if(localStorage.getItem('abapg_premium_version')!==ABAPG_PREMIUM_VERSION){
+      if('caches' in window){
+        const keys=await caches.keys();
+        await Promise.all(keys.filter(k=>k.indexOf('abapg-one')===0).map(k=>caches.delete(k)));
+      }
+      localStorage.setItem('abapg_premium_version',ABAPG_PREMIUM_VERSION);
+    }
+  }catch(e){}
+});
+/* ===== FINE ABAPG ONE PREMIUM RUNTIME v6.1 ===== */
+
 setRole(state.role);
 </script>
 </body>
