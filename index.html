@@ -369,6 +369,113 @@ window.addEventListener('load',async()=>{
 });
 /* ===== FINE INTEGRAZIONE CONTENUTI UFFICIALI ===== */
 
+
+/* ===== ABAPG ONE — HOME STUDENTE CON CORSO UFFICIALE v5 ===== */
+const studentDemoProfile = {
+  name:'Matteo Verdi',
+  course:'Scenografia',
+  level:'Diploma Accademico di Primo Livello — Triennio',
+  year:'2° anno (profilo demo)',
+  coordinator:'Prof.ssa Marta Crisolini Malatesta',
+  totalCfa:180,
+  courseUrl:'https://www.abaperugia.com/corsi/scenografia-triennale/',
+  planUrl:'https://www.abaperugia.com/wp-content/uploads/2023/09/ABAPG-triennio-Scenografia.pdf',
+  plansIndexUrl:'https://www.abaperugia.com/piani-di-studio/'
+};
+
+function studentCourseCard(){
+  const p=studentDemoProfile;
+  return `
+  <div class="card hero">
+    <span class="pill magenta">IL MIO CORSO</span>
+    <h2 style="font-size:31px;margin:14px 0 5px">${p.course}</h2>
+    <p style="margin:0 0 8px">${p.level}</p>
+    <div class="meta" style="color:#eaddea"><span>${p.year}</span><span>•</span><span>${p.totalCfa} CFA</span></div>
+    <p style="margin-top:14px">Coordinatore: <b>${p.coordinator}</b></p>
+    <div class="miniActions">
+      <a class="btn primary" href="${p.courseUrl}" target="_blank" rel="noopener">Scheda del corso</a>
+      <a class="btn light" href="${p.planUrl}" target="_blank" rel="noopener">Piano di studi PDF</a>
+    </div>
+  </div>`;
+}
+
+studentHome=function(){
+  const p=studentDemoProfile;
+  return `${title('Home studente','Corso, piano di studi e servizi personali')}
+  <div class="grid g2">
+    ${studentCourseCard()}
+    <div class="card soft">
+      <span class="pill red">PROSSIMA LEZIONE</span>
+      <h2 style="margin-top:14px">Scenografia</h2>
+      <p>17:00–19:00 • Aula 3</p>
+      <p><b>Frequenza demo: 84%</b></p>
+      <div class="progress"><span style="width:84%"></span></div>
+      <div class="miniActions">
+        <button class="btn primary" onclick="go('firmaQr')">Firma lezione QR</button>
+        <button class="btn outline" onclick="go('lezioni')">Vedi lezioni</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <h3>Piano di studi ufficiale</h3>
+    <div class="grid g3">
+      <div class="card soft"><div class="label">Percorso</div><div style="font-size:24px;font-weight:800;margin-top:7px">${p.totalCfa} CFA</div><p class="sub">Diploma Accademico di I livello</p></div>
+      <div class="card soft"><div class="label">Piano ufficiale</div><p class="sub" style="margin-top:10px">Documento pubblicato dall’Accademia</p><a class="btn primary" href="${p.planUrl}" target="_blank" rel="noopener">Apri piano</a></div>
+      <div class="card soft"><div class="label">Materie e programmi</div><p class="sub" style="margin-top:10px">Scheda ufficiale del corso</p><a class="btn outline" href="${p.courseUrl}" target="_blank" rel="noopener">Apri materie</a></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <h3>Accesso rapido al corso</h3>
+    <div class="quick">
+      <a href="${p.courseUrl}" target="_blank" rel="noopener"><span class="ico">◎</span><strong>Scheda corso</strong></a>
+      <a href="${p.planUrl}" target="_blank" rel="noopener"><span class="ico">▦</span><strong>Piano studi</strong></a>
+      <a href="${p.courseUrl}" target="_blank" rel="noopener"><span class="ico">▤</span><strong>Materie</strong></a>
+      <button onclick="go('lezioni')"><span class="ico">◷</span><strong>Orario</strong></button>
+    </div>
+  </div>
+
+  <div class="grid g4" style="margin-top:18px">
+    <div class="card kpi"><div class="label">CFA acquisiti</div><div class="value">62</div><div class="sub">dato demo — futuro ISIDATA</div></div>
+    <div class="card kpi"><div class="label">Media</div><div class="value">27,4</div><div class="sub">dato demo — futuro ISIDATA</div></div>
+    <div class="card kpi"><div class="label">Esami prenotati</div><div class="value">2</div><div class="sub">dato demo — futuro ISIDATA</div></div>
+    <div class="card kpi"><div class="label">Notifiche</div><div class="value">3</div><div class="sub">avvisi ABAPG</div></div>
+  </div>`;
+};
+
+pages.piano=()=>`${title('Piano di studi','Piano ufficiale del corso del profilo studente')}
+<div class="grid g2">
+  ${studentCourseCard()}
+  <div class="card">
+    <h3>Come verrà personalizzato</h3>
+    <p><b>Adesso:</b> il profilo demo è associato a Scenografia – Triennio e usa la scheda e il piano ufficiali pubblicati da ABAPG.</p>
+    <p><b>Con ISIDATA:</b> corso, anno, piano approvato, esami e CFA saranno selezionati automaticamente in base allo studente autenticato.</p>
+    <div class="miniActions">
+      <a class="btn primary" href="${studentDemoProfile.planUrl}" target="_blank" rel="noopener">Piano ufficiale PDF</a>
+      <a class="btn outline" href="${studentDemoProfile.plansIndexUrl}" target="_blank" rel="noopener">Tutti i piani ABAPG</a>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <h3>Estratto dimostrativo — 1° anno Scenografia</h3>
+  <table class="table">
+    <tr><th>Insegnamento</th><th>CFA</th><th>Tipologia</th></tr>
+    <tr><td>Disegno tecnico e progettuale</td><td>8</td><td>Base</td></tr>
+    <tr><td>Storia della moda</td><td>6</td><td>Base</td></tr>
+    <tr><td>Scenografia 1</td><td>8</td><td>Caratterizzante</td></tr>
+    <tr><td>Scenotecnica 1</td><td>8</td><td>Caratterizzante</td></tr>
+    <tr><td>Regia</td><td>10</td><td>Caratterizzante</td></tr>
+    <tr><td>Legislazione per lo spettacolo</td><td>4</td><td>Affine</td></tr>
+    <tr><td>Storia dell’architettura teatrale</td><td>6</td><td>Affine</td></tr>
+    <tr><td>Progettazione spazi sonori</td><td>6</td><td>Affine</td></tr>
+    <tr><td>A scelta dello studente</td><td>4</td><td>Scelta</td></tr>
+  </table>
+  <div style="margin-top:14px"><a class="btn primary" href="${studentDemoProfile.planUrl}" target="_blank" rel="noopener">Apri documento ufficiale</a></div>
+</div>`;
+/* ===== FINE HOME STUDENTE v5 ===== */
+
 setRole(state.role);
 </script>
 </body>
