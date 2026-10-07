@@ -77,6 +77,21 @@ button,input,select,textarea{font:inherit} button{cursor:pointer} a{text-decorat
 .mobilebar{display:none}
 @media(max-width:1120px){.app{grid-template-columns:270px 1fr}.g4,.g3{grid-template-columns:repeat(2,1fr)}.heroSplit,.splitPanel{grid-template-columns:1fr}}
 @media(max-width:780px){.app{display:block}.sidebar{display:none}.top{height:auto;padding:16px 18px}.content{padding:18px 14px 92px}.g2,.g3,.g4,.quick{grid-template-columns:1fr}.sectionTitle h2{font-size:24px}.heroSplit{grid-template-columns:1fr}.mobilebar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:12;padding:8px 5px max(8px,env(safe-area-inset-bottom))}.mobilebar button{border:0;background:transparent;font-size:10px;padding:6px 2px;color:#5d5a54}.mobilebar span{display:block;font-size:18px}.user .name{display:none}.qrSvg{width:190px;height:190px}}
+
+/* ABAPG official-content integration */
+.officialGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.officialSource{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:12px}
+.officialSource:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(53,114,85,.10)}
+.officialLive{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.officialLive h1,.officialLive h2,.officialLive h3,.officialLive h4{margin:16px 0 8px;line-height:1.2}
+.officialLive p,.officialLive li{line-height:1.55}
+.officialLive table{width:100%;border-collapse:collapse;margin:12px 0}
+.officialLive th,.officialLive td{padding:9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.officialLive a{color:var(--accent-2);font-weight:700;text-decoration:underline}
+.officialLoading{padding:18px;border-radius:14px;background:var(--panel-soft);color:var(--muted)}
+.officialFallback{padding:18px;border-radius:14px;background:#fff7fb;border:1px dashed #ddb7d6}
+@media(max-width:780px){.officialGrid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -148,14 +163,213 @@ function examModal(){return `<h2>Appello Scenografia 3D</h2><p>20 ottobre 2026 �
 function roomModal(room){return `<h2>Prenota ${room}</h2><div class="field"><label>Data</label><input type="date" value="2026-10-08"></div><div class="field"><label>Orario</label><input value="14:30 – 17:30"></div><button class="btn primary" onclick="fakeSave('Prenotazione salvata in demo')">Conferma</button>`}
 function messageModal(){return `<h2>Nuova comunicazione</h2><div class="field"><label>Destinatari</label><select><option>Tutti</option><option>Docenti</option><option>ATA</option><option>Studenti</option></select></div><div class="field"><label>Titolo</label><input></div><div class="field"><label>Messaggio</label><textarea></textarea></div><button class="btn primary" onclick="fakeSave('Comunicazione inviata in demo')">Invia</button>`}
 function requestModal(){return `<h2>Nuova richiesta</h2><div class="field"><label>Tipologia</label><select><option>Permesso breve</option><option>Ferie</option><option>Missione</option></select></div><div class="field"><label>Periodo</label><input placeholder="es. 12/10/2026 • 2h"></div><button class="btn primary" onclick="fakeSave('Richiesta inviata in demo')">Invia</button>`}
-setRole(state.role);
-</script>
-<script>
-window.addEventListener('load', function(){
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js').catch(function(){});
+
+/* ===== ABAPG ONE — CONTENUTI UFFICIALI ABAPERUGIA.COM v4 ===== */
+const ABAPG_OFFICIAL_VERSION = '4.0';
+const officialSources = {
+  orari: {
+    title:'Orario delle lezioni',
+    slug:'iscrizioni-2',
+    url:'https://www.abaperugia.com/iscrizioni-2/',
+    desc:'Orari ufficiali pubblicati dall’Accademia'
+  },
+  calendario: {
+    title:'Calendario accademico',
+    slug:'calendario-accademico',
+    url:'https://www.abaperugia.com/calendario-accademico/',
+    desc:'Lezioni, sessioni, tesi, vacanze e scadenze'
+  },
+  piani: {
+    title:'Piani di studio',
+    slug:'piani-di-studio',
+    url:'https://www.abaperugia.com/piani-di-studio/',
+    desc:'Piani ufficiali dei corsi triennali e biennali'
+  },
+  materie: {
+    title:'Materie e programmi',
+    slug:'materie',
+    url:'https://www.abaperugia.com/materie/',
+    desc:'Insegnamenti, docenti e programmi'
+  },
+  esami: {
+    title:'Calendario esami e tesi',
+    url:'https://www.abaperugia.com/category/avvisi-di-segreteria/calendario-esami-e-tesi/',
+    desc:'Avvisi e calendari ufficiali'
+  },
+  modulistica: {
+    title:'Modulistica',
+    slug:'modulistica',
+    url:'https://www.abaperugia.com/modulistica/',
+    desc:'Moduli e documentazione ufficiale'
+  }
+};
+
+function officialLink(key,label){
+  const s=officialSources[key];
+  return '<a class="btn outline" href="'+s.url+'" target="_blank" rel="noopener">'+(label||'Apri sul sito ufficiale')+'</a>';
+}
+function officialCards(){
+  return Object.entries(officialSources).map(([key,s]) =>
+    '<div class="card">'+
+      '<div class="officialSource">Fonte: abaperugia.com</div>'+
+      '<h3>'+s.title+'</h3>'+
+      '<p class="sub">'+s.desc+'</p>'+
+      '<div style="margin-top:14px">'+officialLink(key)+'</div>'+
+    '</div>'
+  ).join('');
+}
+function ensureMenu(role,item,index){
+  if(!menus[role].some(x=>x[0]===item[0])){
+    menus[role].splice(Math.min(index,menus[role].length),0,item);
+  }
+}
+ensureMenu('docente',['ufficiale','◎','Info ufficiali'],3);
+ensureMenu('studente',['ufficiale','◎','Info ufficiali'],2);
+ensureMenu('segreteria',['ufficiale','◎','Info ufficiali'],3);
+ensureMenu('admin',['ufficiale','◎','Info ufficiali'],3);
+
+function sanitizeOfficialHtml(rendered){
+  const box=document.createElement('div');
+  box.innerHTML=rendered||'';
+  box.querySelectorAll('script,style,iframe,form,input,button,video,audio,canvas,svg,noscript').forEach(el=>el.remove());
+  box.querySelectorAll('*').forEach(el=>{
+    [...el.attributes].forEach(attr=>{
+      if(el.tagName==='A' && attr.name==='href') return;
+      el.removeAttribute(attr.name);
+    });
+  });
+  box.querySelectorAll('a').forEach(a=>{
+    try{
+      a.href=new URL(a.getAttribute('href')||'', 'https://www.abaperugia.com/').href;
+      a.target='_blank';
+      a.rel='noopener';
+    }catch(e){}
+  });
+  return box.innerHTML;
+}
+
+async function loadOfficialPage(key,target){
+  const source=officialSources[key];
+  if(!source || !source.slug) return;
+  target.innerHTML='<div class="officialLoading">Caricamento contenuto ufficiale da abaperugia.com…</div>';
+  const api='https://www.abaperugia.com/wp-json/wp/v2/pages?slug='+encodeURIComponent(source.slug)+'&_fields=title,content,modified,link';
+  try{
+    const response=await fetch(api,{mode:'cors',cache:'no-store'});
+    if(!response.ok) throw new Error('HTTP '+response.status);
+    const data=await response.json();
+    if(!Array.isArray(data) || !data.length) throw new Error('Contenuto non trovato');
+    const page=data[0];
+    target.innerHTML=
+      '<div class="officialSource">Aggiornato dal sito istituzionale'+(page.modified?' • '+new Date(page.modified).toLocaleDateString('it-IT'):'')+'</div>'+
+      '<div class="officialLive">'+sanitizeOfficialHtml(page.content && page.content.rendered)+'</div>'+
+      '<div style="margin-top:16px">'+officialLink(key,'Apri pagina originale')+'</div>';
+  }catch(err){
+    target.innerHTML=
+      '<div class="officialFallback"><b>Il contenuto live non è disponibile in questo momento.</b>'+
+      '<p class="sub">Puoi comunque aprire la fonte ufficiale aggiornata.</p>'+
+      officialLink(key,'Apri su abaperugia.com')+'</div>';
+  }
+}
+function hydrateOfficialContent(){
+  document.querySelectorAll('[data-official-key]').forEach(el=>{
+    if(el.dataset.loaded==='1') return;
+    el.dataset.loaded='1';
+    loadOfficialPage(el.dataset.officialKey,el);
+  });
+}
+
+pages.ufficiale=()=>`${title('Informazioni ufficiali','Contenuti pubblici gestiti direttamente sul sito dell’Accademia')}
+<div class="card hero">
+  <span class="pill magenta">ABAPERUGIA.COM</span>
+  <h2 style="margin:14px 0 8px">Una sola fonte, sempre aggiornata</h2>
+  <p>ABAPG One usa il sito istituzionale per i contenuti pubblici. Orari, calendario accademico, piani di studio, materie, programmi e modulistica vengono quindi aggiornati una sola volta dall’Accademia. I dati personali restano separati e saranno integrati con ISIDATA.</p>
+</div>
+<div class="officialGrid" style="margin-top:18px">${officialCards()}</div>
+<div class="card" style="margin-top:18px">
+  <h3>Calendario accademico — contenuto live</h3>
+  <div data-official-key="calendario"></div>
+</div>`;
+
+const _oldLezioni=pages.lezioni;
+pages.lezioni=()=>`${title('Lezioni','Orario ufficiale e attività personali')}
+<div class="card hero">
+  <span class="pill magenta">ORARIO UFFICIALE</span>
+  <h3 style="margin-top:14px">Orario delle lezioni da abaperugia.com</h3>
+  <p>La sezione qui sotto prova a leggere direttamente la pagina ufficiale dell’Accademia. La parte personale del docente/studente resterà collegata a ISIDATA.</p>
+  <div class="miniActions">${officialLink('orari','Apri pagina ufficiale')}${officialLink('calendario','Calendario accademico')}</div>
+</div>
+<div class="card" style="margin-top:18px"><div data-official-key="orari"></div></div>
+<div style="margin-top:18px">${_oldLezioni()}</div>`;
+
+pages.piano=()=>`${title('Piano di studi','Piani e materie ufficiali ABAPG')}
+<div class="grid g2">
+  <div class="card">
+    <h3>Piani di studio — contenuto live</h3>
+    <div data-official-key="piani"></div>
+  </div>
+  <div class="card">
+    <h3>Materie e programmi — contenuto live</h3>
+    <div data-official-key="materie"></div>
+  </div>
+</div>
+<div class="card soft" style="margin-top:18px">
+  <h3>Separazione delle fonti</h3>
+  <p><b>abaperugia.com:</b> corsi, piani di studio, materie, programmi, orari e calendario pubblico.</p>
+  <p><b>ISIDATA:</b> piano personale approvato, CFA, carriera, esami sostenuti, registro e presenze.</p>
+</div>`;
+
+const _oldEsami=pages.esami;
+pages.esami=()=>`${_oldEsami()}
+<div class="card" style="margin-top:18px">
+  <div class="officialSource">Fonte ufficiale</div>
+  <h3>Calendario esami e tesi</h3>
+  <p class="sub">Consulta gli aggiornamenti ufficiali pubblicati dalla Segreteria.</p>
+  ${officialLink('esami','Apri calendario esami e tesi')}
+</div>`;
+
+const _oldDocumenti=pages.documenti;
+pages.documenti=()=>`${_oldDocumenti()}
+<div class="card" style="margin-top:18px">
+  <h3>Modulistica ufficiale</h3>
+  <div data-official-key="modulistica"></div>
+</div>`;
+
+if(pages.integrazioni){
+  pages.integrazioni=()=>`${title('Integrazioni','Fonti e servizi collegati')}
+  <div class="grid g2">
+    <div class="card"><h3>abaperugia.com</h3><span class="status ok">Fonte pubblica</span><p>Orari, calendario, piani di studio, materie, programmi, esami e modulistica.</p><button class="btn outline" onclick="go('ufficiale')">Apri fonti ufficiali</button></div>
+    <div class="card"><h3>ISIDATA</h3><span class="status warn">API da definire</span><p>Dati personali, registro, presenze, carriera, esami e fascicolo.</p></div>
+  </div>`;
+}
+
+const _renderBase=render;
+render=function(){
+  _renderBase();
+  setTimeout(hydrateOfficialContent,0);
+};
+
+/* Aggiornamento PWA: pulisce una volta la vecchia cache, utile dopo la sostituzione di index.html */
+window.addEventListener('load',async()=>{
+  if(localStorage.getItem('abapg_official_version')!==ABAPG_OFFICIAL_VERSION){
+    try{
+      if('caches' in window){
+        const keys=await caches.keys();
+        await Promise.all(keys.filter(k=>k.indexOf('abapg-one')===0).map(k=>caches.delete(k)));
+      }
+      if('serviceWorker' in navigator){
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r=>r.unregister()));
+        setTimeout(()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}),800);
+      }
+      localStorage.setItem('abapg_official_version',ABAPG_OFFICIAL_VERSION);
+    }catch(e){}
+  }else if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
   }
 });
+/* ===== FINE INTEGRAZIONE CONTENUTI UFFICIALI ===== */
+
+setRole(state.role);
 </script>
 </body>
 </html>
