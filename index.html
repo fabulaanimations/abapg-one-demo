@@ -161,6 +161,21 @@ button,input,select,textarea{font:inherit} button{cursor:pointer} a{text-decorat
   .courseBannerText h2{font-size:32px}
 }
 
+
+/* ===== ABAPG ONE DARK THEME v6.3 ===== */
+html,body{background:#000 !important;color:#f5eef4 !important}
+body{background-image:none !important}
+#app,.app,.shell,.main,.content,.sidebar,.phone,.screen{background:#000 !important}
+.topbar,.header,.bottomNav,.nav,.sidebar,.drawer{background:#090909 !important;border-color:#242024 !important}
+.card,.newsCard,.kpi,.soft,.modalContent,.panel,.sheet{background:#101010 !important;color:#f5eef4 !important;border-color:#2b2430 !important;box-shadow:0 18px 40px rgba(0,0,0,.35)!important}
+.sub,.meta,.label,.muted,.status,.table th,.table td{color:#cbbfc8 !important}
+.table th,.table td{border-color:#2b2430 !important}
+.quick a,.quick button{background:#111 !important;color:#fff !important;border-color:#2d2530 !important}
+.btn.outline,.btn.light,.premiumGhost{background:#111 !important;color:#fff !important;border-color:#3f3340 !important}
+input,select,textarea{background:#0d0d0d !important;color:#fff !important;border-color:#2b2430 !important}
+a{color:#ff63de}
+.hero,.visualCard,.premiumHero,.courseBanner,.quoteBlock{box-shadow:0 25px 60px rgba(0,0,0,.45)!important}
+
 </style>
 </head>
 <body>
@@ -842,6 +857,75 @@ window.addEventListener('load', () => {
   } catch(e) {}
 });
 /* ===== FINE FIX IMMAGINI v6.2 ===== */
+
+
+/* ===== ABAPG ONE COURSE MAP + DARK v6.3 ===== */
+const ABAPG_COURSEMAP_VERSION='6.3';
+const courseVisualMap = {
+  'character design e gaming': {slug:'character-design-e-gaming', fallback:'generic'},
+  'cinema e audiovisivo': {slug:'cinema-e-audiovisivo', fallback:'generic'},
+  'fashion design': {slug:'fashion-design', fallback:'generic'},
+  'fotografia, video e social media per le arti': {slug:'fotografia-video-e-social-media-per-le-arti', fallback:'generic'},
+  'grafica e illustrazione d’arte': {slug:'grafica-e-illustrazione-darte', fallback:'generic'},
+  "grafica e illustrazione d'arte": {slug:'grafica-e-illustrazione-darte', fallback:'generic'},
+  'graphic design': {slug:'graphic-design', fallback:'generic'},
+  'illustrazione e linguaggi del fumetto': {slug:'illustrazione-e-linguaggi-del-fumetto', fallback:'generic'},
+  'pittura': {slug:'pittura', fallback:'generic'},
+  'product design sostenibile': {slug:'product-design-sostenibile', fallback:'generic'},
+  'scenografia': {slug:'scenografia-triennale', fallback:'scenografia'},
+  'scultura': {slug:'scultura', fallback:'generic'},
+  'brand design': {slug:'brand-design', fallback:'generic'},
+  'fashion design per la maglieria': {slug:'fashion-design-per-la-maglieria', fallback:'generic'},
+  'product design – progettazione sostenibile': {slug:'product-design-progettazione-sostenibile', fallback:'generic'},
+  'arti visive e discipline dello spettacolo – scenografia': {slug:'scenografia', fallback:'scenografia'}
+};
+
+function currentCourseKey(){
+  if(!window.studentDemoProfile || !studentDemoProfile.course) return 'scenografia';
+  return String(studentDemoProfile.course).trim().toLowerCase();
+}
+
+async function applyMappedCourseImages(){
+  const key=currentCourseKey();
+  const cfg=courseVisualMap[key] || courseVisualMap['scenografia'];
+  const fallback = (cfg && cfg.fallback==='scenografia') ? ABAPG_STATIC_IMAGES.scenografia : ABAPG_STATIC_IMAGES.generic;
+
+  // Docente e ruoli diversi dallo studente: immagini generiche istituzionali
+  if(state && state.role !== 'studente'){
+    setFixedImage('[data-abapg-hero="academy"]', ABAPG_STATIC_IMAGES.generic);
+    setFixedImage('[data-abapg-hero="campus"]', ABAPG_STATIC_IMAGES.generic);
+    setFixedImage('[data-abapg-hero="museum"]', ABAPG_STATIC_IMAGES.generic);
+    setFixedImage('[data-abapg-hero="course"]', ABAPG_STATIC_IMAGES.generic);
+    setFixedImage('[data-abapg-hero="event"]', ABAPG_STATIC_IMAGES.generic);
+    return;
+  }
+
+  // Studente: tenta immagine del corso dal sito, altrimenti fallback fisso
+  let courseImage = fallback;
+  try{
+    if(cfg && cfg.slug){
+      const fetched = await resolveAbapgImage(cfg.slug);
+      if(fetched) courseImage = fetched;
+    }
+  }catch(e){}
+
+  setFixedImage('[data-abapg-hero="course"]', courseImage);
+  setFixedImage('[data-abapg-hero="event"]', courseImage);
+  setFixedImage('[data-abapg-hero="academy"]', ABAPG_STATIC_IMAGES.generic);
+  setFixedImage('[data-abapg-hero="campus"]', ABAPG_STATIC_IMAGES.generic);
+  setFixedImage('[data-abapg-hero="museum"]', ABAPG_STATIC_IMAGES.generic);
+}
+
+const renderBeforeCourseMap = render;
+render = function(){
+  renderBeforeCourseMap();
+  setTimeout(()=>{ applyMappedCourseImages(); }, 80);
+};
+
+window.addEventListener('load',()=>{
+  try{ localStorage.setItem('abapg_coursemap_version', ABAPG_COURSEMAP_VERSION); }catch(e){}
+});
+/* ===== FINE COURSE MAP + DARK v6.3 ===== */
 
 setRole(state.role);
 </script>
