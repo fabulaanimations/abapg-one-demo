@@ -1,7 +1,8 @@
-const CACHE_NAME = 'abapg-one-mock-v7.0.1';
+const CACHE_NAME = 'abapg-one-mock-v7.1.1';
 const CORE = [
   './', './index.html', './manifest.webmanifest',
-  './theme.css?v=7.0.1', './app.css?v=7.0.1', './mock-isidata.js?v=7.0.1', './app.js?v=7.0.1',
+  './theme.css?v=7.1.1', './app.css?v=7.1.1', './mock-isidata.js?v=7.1.1', './app.js?v=7.1.1',
+  './presence-core.js?v=7.1.1', './presence-ui.js?v=7.1.1', './vendor/qrcode.js', './vendor/jsQR.js',
   './assets/logo-completo.png', './assets/app-icon.png', './assets/apple-touch-icon.png',
   './assets/icon-192.png', './assets/icon-512.png', './assets/generic.jpg', './assets/scenografia.jpg'
 ];
