@@ -1,26 +1,27 @@
 {
   "name": "ABAPG One",
   "short_name": "ABAPG One",
-  "description": "App istituzionale dell'Accademia di Belle Arti Pietro Vannucci",
+  "id": "./",
+  "description": "ABAPG One — demo con dati accademici fittizi e accesso ISIDATA simulato",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#121012",
-  "theme_color": "#d52bbd",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "lang": "it-IT",
   "icons": [
     {
       "src": "assets/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "assets/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
